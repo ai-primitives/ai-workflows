@@ -12,13 +12,13 @@ function createSchemaFromTemplate(template: Record<string, any>): z.ZodType {
   if (template.type === 'object') {
     const shape: Record<string, z.ZodType> = {}
     for (const [key, prop] of Object.entries(template.properties || {})) {
-      shape[key] = createSchemaFromTemplate(prop)
+      shape[key] = createSchemaFromTemplate(prop as Record<string, any>)
     }
     return z.object(shape)
   }
 
   if (template.type === 'array') {
-    return z.array(createSchemaFromTemplate(template.items))
+    return z.array(createSchemaFromTemplate(template.items as Record<string, any>))
   }
 
   switch (template.type) {

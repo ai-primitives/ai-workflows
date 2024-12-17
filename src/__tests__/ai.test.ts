@@ -33,24 +33,31 @@ describe('AI Proxy', () => {
     expect(content).toContain('interface Output')
   })
 
-  it('supports template literal pattern', async () => {
-    const result = await ai`What is 2+2?`
-    expect(result).toBeDefined()
+  it('uses chat completions API', async () => {
+    const result = await (ai as any).chat.completions.create({
+      model: "gpt-4",
+      messages: [{ role: "user", content: "What is 2+2?" }]
+    })
+    expect(result.choices[0].message.content).toBeDefined()
+  })
+
+  it('supports function calls', async () => {
+    const result = await (ai as any).summarize("Test content")
     expect(typeof result).toBe('string')
   })
 
-  it('supports options pattern', async () => {
-    const result = await ai`What is 2+2?`({ model: 'gpt-4' })
-    expect(result).toBeDefined()
-    expect(typeof result).toBe('string')
-  })
+  it('generates MDX files for new functions', async () => {
+    const functionName = 'newTestFunction'
+    const mdxPath = path.join(functionsDir, `${functionName}.mdx`)
 
-  it('supports async iterator pattern', async () => {
-    const chunks: string[] = []
-    for await (const chunk of ai`What is 2+2?`) {
-      chunks.push(chunk)
-    }
-    expect(chunks.length).toBeGreaterThan(0)
-    expect(chunks.every(chunk => typeof chunk === 'string')).toBe(true)
+    await (ai as any)[functionName]("Test input")
+
+    const exists = await fs.access(mdxPath)
+      .then(() => true)
+      .catch(() => false)
+    expect(exists).toBe(true)
+
+    const content = await fs.readFile(mdxPath, 'utf8')
+    expect(content).toContain(`name: ${functionName}`)
   })
 })

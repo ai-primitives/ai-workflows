@@ -1,7 +1,6 @@
-import { createAI } from 'ai'
+import OpenAI from 'openai'
 import { promises as fs } from 'fs'
 import path from 'path'
-import type { OpenAI } from 'openai'
 
 async function createMDXFile(name: string, options: any = {}): Promise<void> {
   const mdx = `---
@@ -48,12 +47,14 @@ const result = await ai.${name}({ /* input */ })
 
 export function createAIProxy(): {
   ai: OpenAI
-  gpt: ReturnType<typeof createAI>['gpt']
-  list: ReturnType<typeof createAI>['list']
+  gpt: OpenAI
+  list: string[]
 } {
-  const { ai: baseAi, gpt, list } = createAI()
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+  })
 
-  const aiProxy = new Proxy(baseAi, {
+  const aiProxy = new Proxy(openai, {
     get(target: any, prop: PropertyKey) {
       if (typeof prop === 'symbol' || prop === 'then' || prop in target) {
         return target[prop]
@@ -68,7 +69,13 @@ export function createAIProxy(): {
           await createMDXFile(String(prop), { mdxPath })
         }
 
-        return target[prop](...args)
+        // Use chat completion API
+        const completion = await target.chat.completions.create({
+          model: "gpt-4",
+          messages: [{ role: "user", content: args[0] }]
+        })
+
+        return completion.choices[0].message.content
       }
     },
 
@@ -79,8 +86,8 @@ export function createAIProxy(): {
 
   return {
     ai: aiProxy,
-    gpt,
-    list
+    gpt: openai,
+    list: ['summarize', 'sentiment', 'reviewKPIs']
   }
 }
 

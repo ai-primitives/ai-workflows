@@ -1,5 +1,6 @@
 import React from 'react'
 import { render } from '@testing-library/react'
+import '@testing-library/jest-dom'
 import { WorkflowVisualization } from '../components/WorkflowVisualization'
 import type { Workflow } from '../types'
 

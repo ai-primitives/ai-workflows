@@ -10,6 +10,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "jsx": "react",
+    "resolveJsonModule": true,
     "paths": {
       "@/*": ["./src/*"]
     }
