@@ -17,6 +17,9 @@ importers:
       mdxld:
         specifier: ^0.1.1
         version: 0.1.1
+      openai:
+        specifier: ^4.76.3
+        version: 4.76.3(zod@3.24.1)
       react:
         specifier: ^19.0.0
         version: 19.0.0
