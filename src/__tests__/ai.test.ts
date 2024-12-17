@@ -34,20 +34,23 @@ describe('AI Proxy', () => {
   })
 
   it('supports template literal pattern', async () => {
-    const result = await ai`test prompt ${123}`
+    const result = await ai`What is 2+2?`
     expect(result).toBeDefined()
+    expect(typeof result).toBe('string')
   })
 
   it('supports options pattern', async () => {
-    const result = await ai`test prompt`({ model: 'test-model' })
+    const result = await ai`What is 2+2?`({ model: 'gpt-4' })
     expect(result).toBeDefined()
+    expect(typeof result).toBe('string')
   })
 
   it('supports async iterator pattern', async () => {
     const chunks: string[] = []
-    for await (const chunk of ai`test prompt`) {
+    for await (const chunk of ai`What is 2+2?`) {
       chunks.push(chunk)
     }
     expect(chunks.length).toBeGreaterThan(0)
+    expect(chunks.every(chunk => typeof chunk === 'string')).toBe(true)
   })
 })

@@ -1,11 +1,13 @@
-import { createAIFunction } from 'ai-functions'
 import { promises as fs } from 'fs'
-import matter from 'gray-matter'
+import { parse as parseMDXLD } from 'mdxld'
 import { z } from 'zod'
 
-/**
- * Creates a Zod schema from a JSON Schema template
- */
+interface MDXFrontmatter {
+  input?: Record<string, any>
+  output?: Record<string, any>
+  [key: string]: any
+}
+
 function createSchemaFromTemplate(template: Record<string, any>): z.ZodType {
   if (template.type === 'object') {
     const shape: Record<string, z.ZodType> = {}
@@ -31,15 +33,26 @@ function createSchemaFromTemplate(template: Record<string, any>): z.ZodType {
   }
 }
 
-/**
- * Loads an MDX file and creates an AI function from its frontmatter
- */
 export async function loadMDXFunction(filePath: string) {
   const content = await fs.readFile(filePath, 'utf8')
-  const { data: frontmatter } = matter(content)
+  const { frontmatter } = parseMDX(content)
 
-  const inputSchema = createSchemaFromTemplate(frontmatter.input)
-  const outputSchema = createSchemaFromTemplate(frontmatter.output)
+  const inputSchema = createSchemaFromTemplate(frontmatter.input || {})
+  const outputSchema = createSchemaFromTemplate(frontmatter.output || {})
 
-  return createAIFunction(outputSchema)
+  return {
+    input: inputSchema,
+    output: outputSchema,
+    name: frontmatter.name || 'unnamed'
+  }
+}
+
+export function parseMDX(content: string) {
+  const result = parseMDXLD(content)
+  const frontmatter = result.data as MDXFrontmatter
+
+  return {
+    frontmatter,
+    content: result.content
+  }
 }
