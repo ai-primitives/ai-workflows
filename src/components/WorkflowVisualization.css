@@ -1,0 +1,33 @@
+.workflow-view {
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.workflow-view h2 {
+  margin-top: 0;
+  color: #374151;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.workflow-view.design {
+  background-color: #f3f4f6;
+}
+
+.workflow-view.schedule {
+  background-color: #eef2ff;
+}
+
+.workflow-view.status {
+  background-color: #ecfdf5;
+}
+
+.workflow-view.execution {
+  background-color: #fef3c7;
+}
+
+.workflow-view.instance {
+  background-color: #fdf2f8;
+}
