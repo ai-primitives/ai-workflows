@@ -1,6 +1,7 @@
 import { promises as fs } from 'fs'
 import { parse as parseMDXLD } from 'mdxld'
 import { z } from 'zod'
+import type { AIFunction } from '../types/ai'
 
 interface MDXFrontmatter {
   input?: Record<string, any>
@@ -33,18 +34,25 @@ function createSchemaFromTemplate(template: Record<string, any>): z.ZodType {
   }
 }
 
-export async function loadMDXFunction(filePath: string) {
+export async function loadMDXFunction(filePath: string): Promise<AIFunction> {
   const content = await fs.readFile(filePath, 'utf8')
   const { frontmatter } = parseMDX(content)
 
   const inputSchema = createSchemaFromTemplate(frontmatter.input || {})
   const outputSchema = createSchemaFromTemplate(frontmatter.output || {})
 
-  return {
-    input: inputSchema,
-    output: outputSchema,
-    name: frontmatter.name || 'unnamed'
+  const fn = async (input: any) => {
+    const validInput = inputSchema.parse(input)
+    return outputSchema.parse({})
   }
+
+  fn.schema = {
+    input: inputSchema,
+    output: outputSchema
+  }
+  fn.name = frontmatter.name || 'unnamed'
+
+  return fn
 }
 
 export function parseMDX(content: string) {

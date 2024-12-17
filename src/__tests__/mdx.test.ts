@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { loadMDXFunction } from '../core/mdx'
 import { promises as fs } from 'fs'
 import path from 'path'
+import type { AIFunction } from '../types/ai'
 
 describe('MDX Loader', () => {
   const functionsDir = path.join(process.cwd(), 'functions')
@@ -42,7 +43,7 @@ output:
   })
 
   it('loads MDX file and creates AI function', async () => {
-    const fn = await loadMDXFunction(testMdxPath)
+    const fn: AIFunction = await loadMDXFunction(testMdxPath)
     expect(fn).toBeDefined()
     expect(typeof fn).toBe('function')
     expect(fn.schema).toBeDefined()
