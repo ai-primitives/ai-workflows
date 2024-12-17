@@ -64,6 +64,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.0.8",
+    "@ai-sdk/provider": "^1.0.2",
     "ai": "^4.0.18",
     "ai-functions": "^0.2.19",
     "gray-matter": "^4.0.3",
