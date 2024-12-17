@@ -1,4 +1,6 @@
-import OpenAI from 'openai'
+import { Provider, LanguageModel } from 'ai'
+import { createOpenAI } from '@ai-sdk/openai'
+import { LanguageModelV1, LanguageModelV1CallOptions, LanguageModelV1Result } from '@ai-sdk/provider'
 import { promises as fs } from 'fs'
 import path from 'path'
 
@@ -46,21 +48,22 @@ const result = await ai.${name}({ /* input */ })
 }
 
 export function createAIProxy(): {
-  ai: OpenAI
-  gpt: OpenAI
+  ai: LanguageModel
+  gpt: Provider
   list: string[]
 } {
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
+  const provider = createOpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    compatibility: 'strict'
   })
 
-  const aiProxy = new Proxy(openai, {
+  const aiProxy = new Proxy({} as LanguageModel, {
     get(target: any, prop: PropertyKey) {
       if (typeof prop === 'symbol' || prop === 'then' || prop in target) {
         return target[prop]
       }
 
-      return async function(...args: any[]) {
+      return async function(...args: any[]): Promise<LanguageModelV1Result> {
         const mdxPath = path.join(process.cwd(), 'functions', `${String(prop)}.mdx`)
 
         try {
@@ -69,13 +72,28 @@ export function createAIProxy(): {
           await createMDXFile(String(prop), { mdxPath })
         }
 
-        // Use chat completion API
-        const completion = await target.chat.completions.create({
-          model: "gpt-4",
-          messages: [{ role: "user", content: args[0] }]
-        })
+        const options: LanguageModelV1CallOptions = {
+          prompt: [{
+            role: 'user',
+            content: [{
+              type: 'text',
+              text: String(args[0])
+            }]
+          }],
+          temperature: 0.7,
+          maxTokens: 1000
+        }
 
-        return completion.choices[0].message.content
+        // Use AI SDK for completions
+        const result = await provider.languageModel('gpt-4').doGenerate(options)
+
+        return {
+          ...result,
+          experimental_output: undefined,
+          toolResults: [],
+          steps: [],
+          experimental_providerMetadata: {}
+        }
       }
     },
 
@@ -86,7 +104,7 @@ export function createAIProxy(): {
 
   return {
     ai: aiProxy,
-    gpt: openai,
+    gpt: provider,
     list: ['summarize', 'sentiment', 'reviewKPIs']
   }
 }
