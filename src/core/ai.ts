@@ -1,5 +1,5 @@
 import { createOpenAI } from '@ai-sdk/openai'
-import { LanguageModelV1, LanguageModelV1CallOptions } from '@ai-sdk/provider'
+import type { LanguageModelV1, LanguageModelV1CallOptions } from '@ai-sdk/provider'
 import { promises as fs } from 'fs'
 import path from 'path'
 
@@ -47,8 +47,8 @@ const result = await ai.${name}({ /* input */ })
 }
 
 export function createAIProxy(): {
-  ai: LanguageModelV1
-  openai: any
+  ai: any
+  openai: ReturnType<typeof createOpenAI>
   list: string[]
 } {
   const openai = createOpenAI({
