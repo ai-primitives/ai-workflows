@@ -1,6 +1,5 @@
-import { Provider, LanguageModel } from 'ai'
-import { createOpenAI } from '@ai-sdk/openai'
-import { LanguageModelV1, LanguageModelV1CallOptions, LanguageModelV1Result } from '@ai-sdk/provider'
+import { OpenAIProvider, createOpenAI } from '@ai-sdk/openai'
+import { LanguageModelV1, LanguageModelV1CallOptions } from '@ai-sdk/provider'
 import { promises as fs } from 'fs'
 import path from 'path'
 
@@ -48,65 +47,53 @@ const result = await ai.${name}({ /* input */ })
 }
 
 export function createAIProxy(): {
-  ai: LanguageModel
-  gpt: Provider
+  ai: LanguageModelV1
+  openai: OpenAIProvider
   list: string[]
 } {
-  const provider = createOpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-    compatibility: 'strict'
+  const openai = createOpenAI({
+    apiKey: process.env.OPENAI_API_KEY
   })
 
-  const aiProxy = new Proxy({} as LanguageModel, {
-    get(target: any, prop: PropertyKey) {
-      if (typeof prop === 'symbol' || prop === 'then' || prop in target) {
-        return target[prop]
-      }
+  const aiProxy = new Proxy({} as any, {
+    get(target: any, prop: string | symbol) {
+      if (typeof prop !== 'string') return undefined
 
-      return async function(...args: any[]): Promise<LanguageModelV1Result> {
-        const mdxPath = path.join(process.cwd(), 'functions', `${String(prop)}.mdx`)
-
+      return async (...args: any[]) => {
         try {
-          await fs.access(mdxPath)
-        } catch {
-          await createMDXFile(String(prop), { mdxPath })
-        }
-
-        const options: LanguageModelV1CallOptions = {
-          prompt: [{
-            role: 'user',
-            content: [{
-              type: 'text',
-              text: String(args[0])
+          const model = openai.chat('gpt-4')
+          const result = await model.doGenerate({
+            inputFormat: 'messages',
+            mode: {
+              type: 'regular'
+            },
+            prompt: [{
+              role: 'user',
+              content: [{
+                type: 'text',
+                text: `Execute function ${String(prop)} with arguments: ${JSON.stringify(args)}`
+              }]
             }]
-          }],
-          temperature: 0.7,
-          maxTokens: 1000
-        }
+          })
 
-        // Use AI SDK for completions
-        const result = await provider.languageModel('gpt-4').doGenerate(options)
-
-        return {
-          ...result,
-          experimental_output: undefined,
-          toolResults: [],
-          steps: [],
-          experimental_providerMetadata: {}
+          return result.text
+        } catch (error) {
+          if (process.env.NODE_ENV === 'development') {
+            await createMDXFile(String(prop))
+          }
+          throw error
         }
       }
     },
 
     apply(target: any, thisArg: any, args: any[]) {
-      return target.apply(thisArg, args)
+      return undefined
     }
   })
 
   return {
     ai: aiProxy,
-    gpt: provider,
+    openai,
     list: ['summarize', 'sentiment', 'reviewKPIs']
   }
 }
-
-export const { ai, gpt, list } = createAIProxy()
