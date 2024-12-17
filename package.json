@@ -68,7 +68,6 @@
     "ai-functions": "^0.2.19",
     "gray-matter": "^4.0.3",
     "mdxld": "^0.1.1",
-    "openai": "^4.76.3",
     "react": "^18.3.1",
     "react-dom": "^18.2.0",
     "yaml": "^2.6.1",
