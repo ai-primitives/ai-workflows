@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { add } from './index'
+import { describe, it, expect } from '@jest/globals';
+import { add } from './index.js';
 
 describe('add', () => {
   it('should add two numbers correctly', () => {
