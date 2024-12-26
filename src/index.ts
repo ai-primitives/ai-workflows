@@ -1,3 +1,7 @@
+import { ai } from './ai-proxy.js'
+
+export { ai }
+
 /**
  * A placeholder function that adds two numbers
  * @param a First number
