@@ -20,7 +20,9 @@ const config = {
   extensionsToTreatAsEsm: ['.ts', '.tsx', '.jsx'],
   transformIgnorePatterns: [
     'node_modules/(?!(@testing-library/jest-dom)/)'
-  ]
+  ],
+  testMatch: ['<rootDir>/src/**/*.test.ts'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node']
 };
 
 export default config;
