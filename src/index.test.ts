@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from '@jest/globals';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { add, ai } from './index.js';
 import { mkdir, writeFile } from 'fs/promises';
 import path from 'path';
