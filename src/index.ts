@@ -7,6 +7,3 @@
 export function add(a: number, b: number): number {
   return a + b
 }
-
-export { Workflow } from './core/workflow'
-export { ai } from './core/ai' // Will be implemented in next step
