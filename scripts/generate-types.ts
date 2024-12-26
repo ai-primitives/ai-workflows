@@ -1,9 +1,13 @@
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs'
-import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { dirname, resolve } from 'node:path'
 import matter from 'gray-matter'
 
-const aiDir = path.resolve(process.cwd(), 'ai')
-const outputFile = path.resolve(process.cwd(), 'src/ai-types.d.ts')
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
+const aiDir = resolve(process.cwd(), 'ai')
+const outputFile = resolve(process.cwd(), 'src/ai-types.d.ts')
 
 /**
  * Converts an MDX output type definition to a TypeScript type
