@@ -34,8 +34,8 @@ declare const ai: {
 `
 
   for (const file of mdxFiles) {
-    const methodName = path.basename(file, '.mdx')
-    const content = readFileSync(path.join(aiDir, file), 'utf-8')
+    const methodName = file.replace('.mdx', '')
+    const content = readFileSync(resolve(aiDir, file), 'utf-8')
     const { data: frontmatter } = matter(content)
     
     if (!frontmatter.output?.type) {
