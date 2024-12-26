@@ -2,18 +2,20 @@
 const config = {
   preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'jsdom',
-  moduleNameMapper: {
-    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
-    '^@/(.*)$': '<rootDir>/src/$1'
-  },
-  setupFilesAfterEnv: ['./jest.setup.mjs'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  testRunner: 'jest-circus/runner',
   transform: {
-    '^.+\\.[tj]sx?$': ['ts-jest', {
+    '^.+\\.m?[tj]sx?$': ['ts-jest', {
       useESM: true,
       tsconfig: {
         allowJs: true
       }
     }]
+  },
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
+    '^@/(.*)$': '<rootDir>/src/$1'
   },
   extensionsToTreatAsEsm: ['.ts', '.tsx', '.jsx'],
   transformIgnorePatterns: [
