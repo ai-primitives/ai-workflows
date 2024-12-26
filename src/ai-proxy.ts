@@ -2,7 +2,7 @@ import { readFileSync, existsSync } from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
 import { z } from 'zod'
-import OpenAI from 'openai'
+import { OpenAI } from 'openai'
 
 const aiBasePath = path.resolve(process.cwd(), 'ai')
 const openai = new OpenAI({
@@ -28,14 +28,18 @@ const frontmatterSchema = z.object({
 function createZodSchemaFromOutput(outputDef: Record<string, string>) {
   const { type, description } = outputDef
   
-  if (type.includes('|')) {
-    // Handle enum types (e.g., "Article | BlogPosting | Thing")
-    const enumValues = type.split('|').map(t => t.trim())
-    return z.enum(enumValues as [string, ...string[]]).describe(description)
-  }
+  // Create schema based on output type
+  const schema = type.includes('|')
+    ? z.object({
+        type: z.enum(type.split('|').map(t => t.trim()) as [string, ...string[]]),
+        description: z.string()
+      })
+    : z.object({
+        type: z.string(),
+        description: z.string()
+      })
   
-  // Default to string type with description
-  return z.string().describe(description)
+  return schema.describe(description)
 }
 
 /**
