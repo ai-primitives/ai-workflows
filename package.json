@@ -14,13 +14,13 @@
     "bin"
   ],
   "scripts": {
-    "build": "tsc && ts-node --esm scripts/generate-types.ts",
+    "build": "tsc && NODE_OPTIONS=\"--loader ts-node/esm\" ts-node scripts/generate-types.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint src",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx}\" \"*.{md,mdx}\"",
     "prepublishOnly": "pnpm run build",
-    "generate-types": "ts-node --esm scripts/generate-types.ts"
+    "generate-types": "NODE_OPTIONS=\"--loader ts-node/esm\" ts-node scripts/generate-types.ts"
   },
   "keywords": [
     "ai",
